@@ -1,0 +1,236 @@
+<style>
+canvas{
+position:absolute;
+left: 0px;
+background:black;
+border:2px solid white;
+}
+#clack {
+height:80px;
+width:130px;
+top:285px;
+position:absolute;
+top:285px;
+left:435px
+}
+body {
+background:grey;
+}
+
+</style>
+<button type="button" id="clack" onclick="play()">START</h2>
+<script>
+let bloodSugar, idealSugar, highScore,sugarCubes=[]
+
+function gameOver() {
+bloodSugar,idealSugar, sugarCubes
+
+}
+/// START
+function play() {
+sugarCubes= []
+bloodSugar = new organ()
+idealSugar = new winOrLose()
+highscore = new scoreBox()
+gameArea.start()
+
+}
+
+//////////////* Game Area*////////
+let gameArea = {
+canvas: document.createElement("canvas"),
+start: function() {
+	this.canvas.width= 600
+	this.canvas.height= 650
+	this.context = this.canvas.getContext("2d")
+	
+	document.body.insertBefore(this.canvas, document.body.childNodes[0])
+	window.addEventListener('keydown', function (e) {
+			gameArea.keys = (gameArea.keys || []);
+			gameArea.keys[e.keyCode] = true;
+    })
+		window.addEventListener('keyup', function (e) {
+			gameArea.keys[e.keyCode] = false;
+    })
+},
+interval: setInterval(framing, 45),
+frameNum: 0,
+clear : function() {
+this.context.clearRect(0,0,this.canvas.width,this.canvas.height)
+}
+}
+
+let scoreBox = function() {
+this.storedFat = 100
+
+this.statsBox = function() {
+ cnstx = gameArea.context
+cnstx.fillStyle = "grey"
+cnstx.fillRect(400,0,600,650)
+}
+}
+
+let winOrLose = function() {
+this.maxSugar = 400                        // level variable min sugar
+this.minSugar = 550						   // level variable max sugar
+
+this.updateLine = function() {
+ cnstx = gameArea.context
+let winLine = cnstx.createLinearGradient(0,0,400 ,0)
+winLine.addColorStop(0, "white")
+winLine.addColorStop(0.5, "transparent")
+winLine.addColorStop(1, "white")
+cnstx.fillStyle = winLine
+cnstx.fillRect(0,this.maxSugar,400,this.minSugar-this.maxSugar)
+}
+}
+
+	function levelVariables(sugar, alpha, beta) {
+this.sugarConsumRate = sugar;
+this.alpha= alpha
+this.beta = beta
+}
+
+
+
+
+														//SUGAR RATES CONSTRUCTOR
+	function organ() {
+this.width = 400;
+this.height = 150;
+this.sugarRate = 200
+this.x =  0
+this.y = 650- this.height
+
+/*
+this.insulin = function() {setTimeout(this.height-=40, 10000)
+}
+*/
+
+this.insulinStimul= true
+this.insulin = function() {
+
+if(this.insulinStimul) {
+sugarCubes.push(new cube(0.6,60,80,340,150,"yellow",25))
+	bloodSugar.height-=20
+	highscore.storedFat+=50
+	this.insulinStimul = false
+
+	}
+  
+
+setTimeout(()=> this.insulinStimul=true, 1000)
+}
+
+this.glucagonStimul=true
+this.glucagon = function() {
+if(this.glucagonStimul  && highscore.storedFat>=50) {
+sugarCubes.push(new cube(0.6,60,80,340,150,"yellow",-25))
+  /*gameArea.context = gameArea.context
+gameArea.context.globalAlpha = 
+gameArea.context.fillStyle*/
+bloodSugar.height+=20
+  highscore.storedFat-=50
+
+this.glucagonStimul = false
+setTimeout(()=> this.glucagonStimul=true, 1000)  
+  }
+
+
+
+}
+
+
+this.newVolume = function () {
+this.y = 650-this.height
+}
+this.update = function() {
+gameArea.context2 = gameArea.context //Unnecessary forsome reason
+	let pulse = gameArea.context2.createRadialGradient(200,(this.y+this.height)/2,this.height,200,(this.y+this.height)/2,400)
+	pulse.addColorStop(0, "red");
+	pulse.addColorStop(1, "black");
+	gameArea.context2.fillStyle= pulse
+    gameArea.context2.fillRect(this.x, this.y, gameArea.canvas.width, this.height);
+}
+
+}
+
+
+
+														//////////////// sugarCube
+function cube(cheat,width,height,x, y, color, apsorbtion) {
+this.width=width;
+this.height= height;
+this.color = color;
+this.x = x;
+this.y = y;
+this.cheat = cheat;
+this.apsorbtion = apsorbtion 
+this.update = function() {
+gameArea.context = gameArea.context
+	gameArea.context.globalAlpha = this.cheat;
+    gameArea.context.fillStyle = this.color;
+    gameArea.context.fillRect(this.x,this.y, this.width, this.height);
+	gameArea.context.globalAlpha = 1;
+}
+this.newPos = function() {
+this.x = this.x
+this.y += this.apsorbtion}
+
+}
+
+
+
+
+function framing() {
+
+gameArea.frameNum+=1
+if (gameArea.frameNum % Math.round(Math.random()*30) == 0) {sugarCubes.push(new cube(0.5,30,30,Math.round(Math.random()*365),0,"white",5+5*Math.random()))}
+if (gameArea.frameNum % 100 ==0) {bloodSugar.height-=8}
+
+if	(bloodSugar.y<=idealSugar.maxSugar || bloodSugar.y>=idealSugar.minSugar) {
+console.log("can you hear me?")
+}
+else {
+gameArea.clear()
+
+
+for (let i=0;i<sugarCubes.length;i++) {
+
+if (Math.ceil(sugarCubes[i].y)+10 >= Math.floor(bloodSugar.y) &&sugarCubes[i].y<=bloodSugar.y) {bloodSugar.height+=1
+bloodSugar.height+=1}
+sugarCubes[i].cheat= 0.85+Math.random()*0.15
+sugarCubes[i].newPos()
+sugarCubes[i].update()
+
+}
+
+bloodSugar.newVolume()
+bloodSugar.update();
+
+idealSugar.updateLine()
+highscore.statsBox()
+gameArea.context = gameArea.context
+gameArea.context.font = "28px  Windings 1";
+gameArea.context.fillStyle="Black"
+gameArea.context.fillText("لا اريد:"+ " "+ highscore.storedFat, 400, 140);
+
+
+gameArea.context.font = "20px Arial";
+gameArea.context.fillStyle="Black"
+gameArea.context.fillText("Maximum Healthy ", 410, 400);
+gameArea.context.fillText(" Blood Sugar!", 410, 425);
+gameArea.context.fillText("Minimum Healthy ", 410, 550);
+gameArea.context.fillText(" Blood Sugar!", 410, 570);
+
+
+  if (gameArea.keys && gameArea.keys[65]) {bloodSugar.glucagon()}
+  if (gameArea.keys && gameArea.keys[68]) {bloodSugar.insulin()}
+  if (gameArea.keys && gameArea.keys[37]) {bloodSugar.glucagon()}
+  if (gameArea.keys && gameArea.keys[39]) {bloodSugar.insulin()}
+
+}
+
+}
+
+</script>
